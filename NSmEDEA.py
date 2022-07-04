@@ -3,18 +3,24 @@ import numpy as np
 
 class MedeaController(Controller):
 
+
     def __init__(self, wm):
         super().__init__(wm)
-        self.weights = None
-        self.received_weights = dict()
+        #self.weights = None
+        self.gList = dict()
         self.rob = Pyroborobo.get()
         self.next_gen_every_it = 400
         self.deactivated = False
         self.next_gen_in_it = self.next_gen_every_it
+        self.genome = []
 
     def reset(self):
-        if self.weights is None:
-            self.weights = np.random.uniform(-1, 1, (self.nb_inputs(), 2))
+        if self.genome == []:
+            initCol = np.random.randint(9) % 3
+            if initCol == 0: self.genome = [255,0,0]
+            elif initCol == 1: self.genome = [0,255,0]
+            elif initCol == 2: self.genome = [0,0,255]
+            self.set_color(*self.genome)
 
     def step(self):
         self.next_gen_in_it -= 1
@@ -24,17 +30,19 @@ class MedeaController(Controller):
 
         if self.deactivated:
             self.set_color(0, 0, 0)
+            self.genome = []
+            self.gList = dict()
             self.set_translation(0)
             self.set_rotation(0)
         else:
-            self.set_color(0, 0, 255)
+            #self.set_color(0, 0, 255)
             # Movement
-            inputs = self.get_inputs()
-            trans_speed, rot_speed = inputs @ self.weights
-            self.set_translation(np.clip(trans_speed, -1, 1))
-            self.set_rotation(np.clip(rot_speed, -1, 1))
+            #inputs = self.get_inputs()
+            #trans_speed, rot_speed = inputs @ self.weights
+            self.set_translation(1)
+            self.set_rotation(np.random.choice([0, -0.5, 0.5]))
             # Share weights
-            self.share_weights()
+            self.broadcast()
 
     def nb_inputs(self):
         return (1  # bias
@@ -42,13 +50,13 @@ class MedeaController(Controller):
                 + 2  # landmark inputs
                 )
 
-    def share_weights(self):
+    def broadcast(self):
         for robot_controller in self.get_all_robot_controllers():
             if robot_controller:
-                robot_controller.receive_weights(self.id, self.weights)
+                robot_controller.exchange(self.id, self.genome)
 
-    def receive_weights(self, rid, weights):
-        self.received_weights[rid] = (weights.copy())
+    def exchange(self,robID, genes):
+        self.gList[robID] = genes
 
     def get_inputs(self):
         dists = self.get_all_distances()
@@ -64,30 +72,38 @@ class MedeaController(Controller):
         landmark_orient = self.get_closest_landmark_orientation()
 
         inputs = np.concatenate([[1], robots_dist, walls_dist, objects_dist, [landmark_dist, landmark_orient]])
-        assert(len(inputs) == self.nb_inputs())
+        #assert(len(inputs) == self.nb_inputs())
         return inputs
 
     def new_generation(self):
-        if self.received_weights:
-            new_weights_key = np.random.choice(list(self.received_weights.keys()))
-            new_weights = self.received_weights[new_weights_key]
-            # mutation
-            # new_weights = np.random.normal(new_weights, 0.1   )
-            self.weights = new_weights
-            self.received_weights.clear()
+        if self.gList:
+            randomRob = np.random.choice(list(self.gList.keys()))
+            selection  = self.gList[randomRob]
+            #new_weights = self.received_weights[new_weights_key]
+            # mutation 1
+            #selection[randomRob%3] += 32;
+            #variation = [x%256 for x in selection]
+            # mutation 2
+            variation = np.random.normal(selection, 0.5)
+            variation = [abs(int(x)) for x in variation]
+            #print("NEW COLOUR IS...", "[",variation[0],",",variation[1],",",variation[2],"]")
+            self.genome = variation
+            self.gList.clear()
             self.deactivated = False
+            self.set_color(*self.genome)
         else:
             self.deactivated = True
 
     def inspect(self, prefix=""):
         output = "inputs: \n" + str(self.get_inputs()) + "\n\n"
         output += "received weights from: \n"
-        output += str(list(self.received_weights.keys()))
+        output += str(list(self.gList.keys()))
         return output
 
 def main():
-    rob = Pyroborobo.create("config/NSmEDEA.properties",
-                            controller_class=MedeaController)
+    rob = Pyroborobo.create("config/talking_robots.properties",
+                            controller_class=MedeaController,
+                            object_class_dict={'_default': ResourceObject, 'select': SelectObject})
     rob.start()
     rob.update(10000)
     rob.close()
