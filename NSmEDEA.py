@@ -102,8 +102,7 @@ class MedeaController(Controller):
 
 def main():
     rob = Pyroborobo.create("config/talking_robots.properties",
-                            controller_class=MedeaController,
-                            object_class_dict={'_default': ResourceObject, 'select': SelectObject})
+                            controller_class=MedeaController)
     rob.start()
     rob.update(10000)
     rob.close()
