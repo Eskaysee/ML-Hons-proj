@@ -1,8 +1,7 @@
-from pyroborobo import Pyroborobo, Controller
+from pyroborobo import Pyroborobo, Controller, CircleObject
 import numpy as np
 
 class MedeaController(Controller):
-
 
     def __init__(self, wm):
         super().__init__(wm)
@@ -19,7 +18,6 @@ class MedeaController(Controller):
             if initCol == 0: self.genome = [255,0,0]
             elif initCol == 1: self.genome = [0,255,0]
             elif initCol == 2: self.genome = [0,0,255]
-            print("[",self.genome[0],",",self.genome[1],",",self.genome[2],"]")
             self.set_color(*self.genome)
 
     def step(self):
@@ -35,29 +33,30 @@ class MedeaController(Controller):
         else:
             # Movement
             self.set_translation(1)
-            self.set_rotation(np.random.choice([0, -0.5, 0.5]))
+            if (self.get_wall_at(2)):  # or in front of us
+                self.set_rotation(np.random.choice([-0.5, 0.5]))
+            else:
+                self.set_rotation(np.random.choice([0, -0.5, 0.5]))
             # Share weights
             self.broadcast()
 
     def broadcast(self):
         for robot_controller in self.get_all_robot_controllers():
             if robot_controller:
-                robot_controller.exchange(self.id, self.genome)
+                robot_controller.exchange(self.id, self)
+                #self.exchange(robot_controller.id, robot_controller)
 
-    def exchange(self,robID, genes):
-        self.gList[robID] = genes.copy()
+    def exchange(self,robID, robot):
+        self.gList[robID] = robot
+        #robot.gList[self.id] = self
 
     def new_generation(self):
         if self.gList:
-            randomRob = np.random.choice(list(self.gList.keys()))
-            selection  = self.gList[randomRob]
-            print("MY Parents Are", self.id, "and", randomRob)
+            selected = self.novelty(self.gList);
+            print("MY Parents Are", self.id, "and", selected.id)
             print("Dad:", "[",self.genome[0],",",self.genome[1],",",self.genome[2],"]")
-            print("Mom:", "[",selection[0],",",selection[1],",",selection[2],"]")
-            # mutation 3
-            #variation = np.random.normal(selection, 0.5)
-            #variation = [abs(int(x)) for x in variation]
-            mutation = self.variation(self.genome, selection.copy())
+            print("Mom:", "[",selected.genome[0],",",selected.genome[1],",",selected.genome[2],"]")
+            mutation = self.variation(self.genome, selected.genome.copy())
             print("MY PHENOTYPE IS...", "[",mutation[0],",",mutation[1],",",mutation[2],"]\n")
             self.genome = mutation
             self.gList.clear()
@@ -66,6 +65,25 @@ class MedeaController(Controller):
         else:
             self.deactivated = True
 
+    def novelty(self, glist):
+        maxKey = 0
+        maxNovel = -1
+        for genome in glist:
+            metric = self.euclidean(self.absolute_position, glist[genome].absolute_position)
+            #metric = self.mates(glist[genome].gList)
+            if (metric > maxNovel): 
+                maxNovel = metric
+                maxKey = genome
+        return glist[maxKey]
+    
+    def euclidean(self, coord1, coord2):
+        x = (coord1[0]-coord2[0])**2
+        y = (coord1[1]-coord2[1])**2
+        return np.sqrt(x+y)
+
+    def mates(self, partners):
+        return len(partners)
+    
     def variation(self, parent1, parent2):
         for i in range(3): parent2[i] += parent1[i]
         v1 = [x%256 for x in parent2]
@@ -80,9 +98,42 @@ class MedeaController(Controller):
         output += str(list(self.gList.keys()))
         return output
 
+
+class ResourceObject(CircleObject):
+    def __init__(self, id_, data):
+        CircleObject.__init__(self, id_)  # Do not forget to call super constructor
+        self.regrow_time = 100
+        self.cur_regrow = 0
+        self.triggered = False
+        self.rob = Pyroborobo.get()  # Get pyroborobo singleton
+
+    def reset(self):
+        self.show()
+        self.register()
+        self.triggered = False
+        self.cur_regrow = 0
+
+    def step(self):
+        if self.triggered:
+            self.cur_regrow -= 1
+            if self.cur_regrow <= 0:
+                self.show()
+                self.register()
+                self.triggered = False
+
+    def is_walked(self, rob_id):
+        self.triggered = True
+        self.cur_regrow = self.regrow_time
+        self.hide()
+        self.unregister()
+
+    def inspect(self, prefix=""):
+        return f"""I'm a ResourceObject with id: {self.id}"""
+
 def main():
     rob = Pyroborobo.create("config/NSmEDEA.properties",
-                            controller_class=MedeaController)
+                            controller_class=MedeaController,
+                            object_class_dict={'_default': ResourceObject})
     rob.start()
     rob.update(10000)
     rob.close()
