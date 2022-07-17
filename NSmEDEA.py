@@ -1,4 +1,4 @@
-from pyroborobo import Pyroborobo, Controller, CircleObject
+from pyroborobo import Pyroborobo, Controller, MovableObject
 import numpy as np
 
 class MedeaController(Controller):
@@ -33,12 +33,21 @@ class MedeaController(Controller):
         else:
             # Movement
             self.set_translation(1)
-            if (self.get_wall_at(2)):  # or in front of us
+            if self.get_wall_at(2):  # or in front of us
                 self.set_rotation(np.random.choice([-0.5, 0.5]))
+            elif self.get_object_at(1) != -1:
+                self.set_rotation(-0.5)
+            elif self.get_object_at(3) != -1:
+                self.set_rotation(0.5)
             else:
                 self.set_rotation(np.random.choice([0, -0.5, 0.5]))
             # Share weights
             self.broadcast()
+            if self.get_distance_at(2) < 0.6:
+                if self.get_robot_id_at(1) != -1:
+                    self.set_rotation(0.5)
+                elif self.get_robot_id_at(3) != -1:
+                    self.set_rotation(-0.5)
 
     def broadcast(self):
         for robot_controller in self.get_all_robot_controllers():
@@ -98,42 +107,53 @@ class MedeaController(Controller):
         output += str(list(self.gList.keys()))
         return output
 
+#########################################
 
-class ResourceObject(CircleObject):
+class Food(MovableObject):
     def __init__(self, id_, data):
-        CircleObject.__init__(self, id_)  # Do not forget to call super constructor
-        self.regrow_time = 100
-        self.cur_regrow = 0
-        self.triggered = False
-        self.rob = Pyroborobo.get()  # Get pyroborobo singleton
+        MovableObject.__init__(self, id_)  # Do not forget to call super constructor
+        self.data = data
+        self.expiry = 250
+        self.lifetime = 0
+        self.newHarvest = 100
+        self.wait = 0
+        self.expired = False
 
     def reset(self):
-        self.show()
+        self.expired = False
         self.register()
-        self.triggered = False
-        self.cur_regrow = 0
+        self.show()
+        self.wait = 0
+        self.lifetime = 0
 
     def step(self):
-        if self.triggered:
-            self.cur_regrow -= 1
-            if self.cur_regrow <= 0:
-                self.show()
-                self.register()
-                self.triggered = False
+        super().step()
+        #if self.expired:
+        #    self.wait -= 1
+        #    self.hide()
+        #    self.unregister()
+        #    if self.wait <= 0:
+        #        self.lifetime = 0
+        #        self.expired = False
+        #else:
+        #    self.register()
+        #    self.show()
+        #    if self.lifetime >= self.expiry:
+        #        self.wait = self.newHarvest
+        #        self.expired = True
 
-    def is_walked(self, rob_id):
-        self.triggered = True
-        self.cur_regrow = self.regrow_time
-        self.hide()
-        self.unregister()
+    def is_pushed(self, rob_id, speed):
+        super().is_pushed(rob_id, speed)
+        #self.lifetime+=1
+        #print(f"I'm moved by {rob_id-1048576}")
 
     def inspect(self, prefix=""):
-        return f"""I'm a ResourceObject with id: {self.id}"""
+        return f"""I'm a Food with id: {self.id}"""
 
 def main():
     rob = Pyroborobo.create("config/NSmEDEA.properties",
                             controller_class=MedeaController,
-                            object_class_dict={'_default': ResourceObject})
+                            object_class_dict={'_default': Food})
     rob.start()
     rob.update(10000)
     rob.close()
