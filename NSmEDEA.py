@@ -14,6 +14,7 @@ class MedeaController(Controller):
         self.seek = True
         self.dropZoneX, self.dropZoneY = np.array(self.rob.arena_size) *0.7
         self.foods = set()
+        self.lastObj = None
         self.novelty = 0
 
     def reset(self):
@@ -41,8 +42,8 @@ class MedeaController(Controller):
             if (self.seek == True):
                 cam = self.find()
                 if cam>-1:
-                    obj = self.get_object_instance_at(cam)
-                    self.foods.add(obj)
+                    self.lastObj = self.get_object_instance_at(cam)
+                    self.foods.add(self.lastObj)
                     #print("obj orientation is", self.get_robot_relative_orientation_at(cam))
                     #print("my orientation is", self.absolute_orientation)        
             else:
@@ -53,17 +54,36 @@ class MedeaController(Controller):
 
     def drop(self):
         orient = self.get_closest_landmark_orientation()
-        myOrient = self.absolute_orientation
-        self.set_translation(1)
-        #print("ORIENT:", orient, "my orient:", self.absolute_orientation)
-        if myOrient > orient:
-            self.set_rotation(myOrient-0.0125)
-        else:
-            self.set_rotation(myOrient+0.0125)
-        #self.set_rotation(orient)
-        if self.inZone():
-            #print("dropped")
-            return True
+        #print("ORIENT:", orient)
+        if not self.inZone():
+            #self.set_translation(1)
+            if orient >= 0.25:
+                self.set_rotation(0.125)
+                if self.get_object_at(2)-1 == self.lastObj.get_id():
+                    self.set_rotation(0)
+                elif self.get_object_at(1)-1 == self.lastObj.get_id():
+                    self.set_rotation(-0.25)
+                elif self.get_object_at(3)-1 == self.lastObj.get_id():
+                    self.set_rotation(0.25)
+                
+            elif orient <= -0.25:
+                self.set_rotation(-0.125)
+                if self.get_object_at(2)-1 == self.lastObj.get_id():
+                    self.set_rotation(0)
+                elif self.get_object_at(3)-1 == self.lastObj.get_id():
+                    self.set_rotation(0.25)
+                elif self.get_object_at(1)-1 == self.lastObj.get_id():
+                    self.set_rotation(-0.25)
+            else:
+                #print("heading home")
+                self.set_rotation(orient)
+                if self.get_object_at(3)-1 == self.lastObj.get_id():
+                    self.set_rotation(0.25)
+                elif self.get_object_at(1)-1 == self.lastObj.get_id():
+                    self.set_rotation(-0.25)
+        else: return True
+            
+        #self.set_absolute_orientation(orient)
 
     def isTaken(self, sensr):
         obj = self.get_object_instance_at(sensr)
@@ -209,7 +229,7 @@ class Food(MovableObject):
             robot = self.rob.controllers[rob_id-self.rob.robot_index_offset]
             if self.robID == -1:
                 self.robID = robot.get_id()
-            #if robot.seek: robot.seek = False
+                if robot.seek: robot.seek = False
         #print(rob_id, speed[0], speed[1])
 
     def inspect(self, prefix=""):
