@@ -1,11 +1,11 @@
 compile:
 	python3 setup.py install --force --user
 
-hybrid: compile
+hybrid: 
 	cd pyRoborobo_dev/examples; python3 NSmEDEA.py
 	
 pythonTut:
-	cd pyRoborobo_dev/examples/
+	cd pyRoborobo_dev/examples
 	python3 tutorial.py
 	
 ceeTut:
