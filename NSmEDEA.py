@@ -7,14 +7,15 @@ class MedeaController(Controller):
         super().__init__(wm)
         self.gList = dict()
         self.rob = Pyroborobo.get()
-        self.next_gen_every_it = 400
+        self.next_gen_every_it = 600
         self.deactivated = False
         self.next_gen_in_it = self.next_gen_every_it
         self.genome = []
         self.seek = True
-        self.dropZoneX, self.dropZoneY = np.array(self.rob.arena_size) *0.7
+        self.dropZoneX, self.dropZoneY = np.array(self.rob.arena_size) *0.65
         self.foods = set()
         self.lastObj = None
+        self.help = False
         self.novelty = 0
 
     def reset(self):
@@ -39,52 +40,70 @@ class MedeaController(Controller):
         else:
             # Movement
             self.set_translation(1)
+            
+            #print(self.get_robot_id_at(3))
             if (self.seek == True):
                 cam = self.find()
                 if cam>-1:
                     self.lastObj = self.get_object_instance_at(cam)
-                    self.foods.add(self.lastObj)
-                    #print("obj orientation is", self.get_robot_relative_orientation_at(cam))
-                    #print("my orientation is", self.absolute_orientation)        
+                    self.foods.add(self.lastObj)       
             else:
                 self.seek = self.drop()
+                
             # Share weights
             self.broadcast()
-            self.novelty = self.nSearch(2)
+            self.novelty = self.nSearch(3)
 
     def drop(self):
-        orient = self.get_closest_landmark_orientation()
-        #print("ORIENT:", orient)
         if not self.inZone():
-            #self.set_translation(1)
-            if orient >= 0.25:
-                self.set_rotation(0.125)
-                if self.get_object_at(2)-1 == self.lastObj.get_id():
-                    self.set_rotation(0)
-                elif self.get_object_at(1)-1 == self.lastObj.get_id():
-                    self.set_rotation(-0.25)
-                elif self.get_object_at(3)-1 == self.lastObj.get_id():
-                    self.set_rotation(0.25)
-                
-            elif orient <= -0.25:
-                self.set_rotation(-0.125)
-                if self.get_object_at(2)-1 == self.lastObj.get_id():
-                    self.set_rotation(0)
-                elif self.get_object_at(3)-1 == self.lastObj.get_id():
-                    self.set_rotation(0.25)
-                elif self.get_object_at(1)-1 == self.lastObj.get_id():
-                    self.set_rotation(-0.25)
-            else:
-                #print("heading home")
-                self.set_rotation(orient)
-                if self.get_object_at(3)-1 == self.lastObj.get_id():
-                    self.set_rotation(0.25)
-                elif self.get_object_at(1)-1 == self.lastObj.get_id():
-                    self.set_rotation(-0.25)
+            if self.lastObj is None:
+                objID = -1
+            else: 
+                objID = self.lastObj.get_id()
+                comrades = []
+                if self.lastObj.type >= 2:
+                    comrades = list(self.lastObj.robs)
+                    pos = comrades.index(self.get_id())
+                    comrades.pop(pos)
+                comrades.append(-1)
+                #print("myID", self.get_id(), "chommies", *comrades)
+                if (self.get_object_at(1)-1 != objID and self.get_object_at(1) != -1) or self.get_robot_id_at(0) not in comrades or self.get_wall_at(0) or self.get_wall_at(1):
+                    #print("TR")
+                    #print(objID, self.get_object_at(1), self.get_robot_id_at(0), self.get_wall_at(0), self.get_wall_at(1))
+                    self.set_rotation(0.5)
+                elif (self.get_object_at(3)-1 != objID and self.get_object_at(3) != -1) or self.get_robot_id_at(4) not in comrades or self.get_wall_at(4) or self.get_wall_at(3):
+                    #print("TL")
+                    self.set_rotation(-0.5)
+            self.navigate(objID)
+            return False
         else: return True
-            
-        #self.set_absolute_orientation(orient)
 
+    def navigate(self, objID):
+        orient = self.get_closest_landmark_orientation()
+        if orient >= 0.25:
+            self.set_rotation(0.125)
+            if self.get_object_at(2)-1 == objID:
+                self.set_rotation(0)
+            elif self.get_object_at(1)-1 == objID:
+                self.set_rotation(-0.25)
+            elif self.get_object_at(3)-1 == objID:
+                self.set_rotation(0.25)
+            
+        elif orient <= -0.25:
+            self.set_rotation(-0.125)
+            if self.get_object_at(2)-1 == objID:
+                self.set_rotation(0)
+            elif self.get_object_at(3)-1 == objID:
+                self.set_rotation(0.25)
+            elif self.get_object_at(1)-1 == objID:
+                self.set_rotation(-0.25)
+        else:
+            self.set_rotation(orient)
+            if self.get_object_at(3)-1 == objID:
+                self.set_rotation(0.25)
+            elif self.get_object_at(1)-1 == objID:
+                self.set_rotation(-0.25)
+            
     def isTaken(self, sensr):
         obj = self.get_object_instance_at(sensr)
         return obj.taken(self.get_id())
@@ -190,47 +209,66 @@ class MedeaController(Controller):
 class Food(MovableObject):
     def __init__(self, id_, data):
         MovableObject.__init__(self, id_)  # Do not forget to call super constructor
-        self.stored = False
-        #self.taken = False
         self.rob = Pyroborobo.get()
         self.dropZoneX, self.dropZoneY = np.array(self.rob.arena_size) *0.65
+        while self.position[0] > self.dropZoneX and self.position[1] > self.dropZoneY:
+            self.relocate() 
         self.robID = -1
-        '''self.data = data
-        self.expiry = 250
-        self.lifetime = 0
-        self.newHarvest = 100
-        self.wait = 0
-        self.expired = False
-
-    def reset(self):
-        self.expired = False
+        self.type = 2
+        self.robs = set()
+        self.unregister()
+        if self.type == -1:
+            self.type = np.random.randint(1,5)%3
+            if self.type == 0: self.type = 3
+        if self.type == 2:
+            self.radius = 10
+            self.set_footprint_radius(12)
+            self.set_color(0,0,255)
+        elif self.type == 3:
+            self.radius = 15
+            self.set_footprint_radius(18)
+            self.set_color(255,0,0)
         self.register()
-        self.show()
-        self.wait = 0
-        self.lifetime = 0'''
-
+        #print(self.type)
+    
     def step(self):
         super().step()
         x, y = self.position
         if x > self.dropZoneX and y > self.dropZoneY:
             self.set_color(0,0,0)
-            self.stored = True
             self.robID = -2
 
     def taken(self, rob_id):
-        if self.robID == -1: return False
-        elif self.robID != rob_id: return True
+        if self.type == 1:
+            if self.robID == -1: return False
+            elif self.robID != rob_id: return True
+        elif self.type == 2:
+            if len(self.robs) < 2: return False
+            else: return True
+        elif self.type == 3:
+            if len(self.robs) < 3: return False
+            else: return True
         else: return False
 
     def is_pushed(self, rob_id, speed):
-        #if self.stored: return
-        super().is_pushed(rob_id, speed)
         if rob_id >= self.rob.robot_index_offset:
             robot = self.rob.controllers[rob_id-self.rob.robot_index_offset]
             if self.robID == -1:
                 self.robID = robot.get_id()
-                if robot.seek: robot.seek = False
-        #print(rob_id, speed[0], speed[1])
+                robot.seek = False
+            if self.type == 2:
+                if len(self.robs) < 2: 
+                    self.robs.add(robot.get_id())
+                    if robot.seek: robot.seek = False
+                    return
+                #if len(self.robs) < 2: return
+            elif self.type == 3:
+                if len(self.robs) < 3: 
+                    self.robs.add(robot.get_id())
+                    if robot.seek: robot.seek = False
+                    return
+                    #if len(self.robs) < 3: return
+        super().is_pushed(rob_id, speed)
 
     def inspect(self, prefix=""):
         return f"""I'm a Food with id: {self.id}"""
