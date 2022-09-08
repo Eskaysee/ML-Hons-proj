@@ -1,5 +1,6 @@
-from pyroborobo import Pyroborobo, Controller, MovableObject
+from pyroborobo import Pyroborobo, Controller, MovableObject, WorldObserver
 import numpy as np
+import time
 
 class MedeaController(Controller):
 
@@ -8,7 +9,7 @@ class MedeaController(Controller):
         self.gList = dict()
         self.rob = Pyroborobo.get()
         self.next_gen_every_it = 600
-        self.wait = 150
+        self.wait = 100
         self.ditch = 25
         self.deactivated = False
         self.next_gen_in_it = self.next_gen_every_it
@@ -20,9 +21,9 @@ class MedeaController(Controller):
         self.dropZoneX, self.dropZoneY = np.array(self.rob.arena_size) *0.65
         self.foods = set()
         self.lastObj = None
-        #self.help = False
         self.novelty = 0
         self.skipSteps = 5
+        self.checkHook = 50
 
     def reset(self):
         if self.genome == []:
@@ -48,8 +49,8 @@ class MedeaController(Controller):
             if self.lastObj is not None:
                 if not self.lastObj.inZone(): self.removeAnchor()
         
-        elif self.next_gen_in_it <= 5:
-            self.novelty = self.nSearch(3)
+        elif self.next_gen_in_it < 3:
+            self.novelty = self.nSearch(5)
             self.new_generation()
             #self.next_gen_in_it = self.next_gen_every_it
 
@@ -64,18 +65,18 @@ class MedeaController(Controller):
                     self.avoid = False
                     self.ditch = 25
             elif self.seek:
-                #if self.inZone(): self.leave()
                 self.find() #cam = self.find()
-                #if self.inZone(): self.leave()       
+                #if self.inZone():
+                #    self.leave()
+                #    self.ditch = 25
             else:
                 self.seek = self.drop()
                 if self.wait <=0 :
                     self.avoid = True
-                    #self.help =  False
                     self.wait = 100
             # Share weights
             self.broadcast()
-            self.novelty = self.nSearch(3)
+            self.novelty = self.nSearch(5)
 
     def removeAnchor(self):
         self.lastObj.removeAnchor(self.get_id())
@@ -96,22 +97,12 @@ class MedeaController(Controller):
     def drop(self):
         objID = self.lastObj.get_id()
         if not self.lastObj.inZone():
-            comrades = []
             self.skipSteps -= 1
+            self.checkHook -= 1
             if self.lastX == self.absolute_position[0] and self.lastY == self.absolute_position[1]:
                 self.wait -=1
             else: 
-                self.wait = 150
-            
-            if self.lastObj.type >= 2:
-                comrades = list(self.lastObj.robs)
-                comrades.remove(self.get_id())
-            comrades.append(-1)
-            if self.lastObj.type ==1:
-                if (self.get_object_at(1)-1 != objID and self.get_object_at(1) != -1) or self.get_robot_id_at(0) not in comrades or self.get_wall_at(0) or self.get_wall_at(1):
-                    self.set_rotation(0.5)
-                elif (self.get_object_at(3)-1 != objID and self.get_object_at(3) != -1) or self.get_robot_id_at(4) not in comrades or self.get_wall_at(4) or self.get_wall_at(3):
-                    self.set_rotation(-0.5)
+                self.wait = 100
             if not self.navigate(objID): return True
             if self.skipSteps <= 0:
                 self.lastX, self.lastY = self.absolute_position
@@ -119,17 +110,17 @@ class MedeaController(Controller):
             return False
         else: 
             self.foods.add(objID)
-            print(self.lastObj.stored())
             return True
 
     def eulogy(self):
         id = str(self.get_id())
         foods = str(self.foods)
-        suitors = str(self.gList)
+        suitors = str(list(self.gList.keys()))
         colour = str(self.genome)
-        return f"""Robot: {id}\
+        return f"""\nRobot: {id}\
             \nTotal resources """ + str(len(self.foods)) + f""": {foods}\
             \nTotal suitors """ + str(len(self.gList)) + f""": {suitors}\
+            \nNovelty: {self.novelty}\
             \nColour: {colour}\n"""
 
     def navigate(self, objID):
@@ -142,9 +133,6 @@ class MedeaController(Controller):
                 self.set_rotation(-0.25)
             elif self.get_object_at(3)-1 == objID:
                 self.set_rotation(0.25)
-            else:
-                self.removeAnchor()
-                return False
         elif orient <= -0.25:
             self.set_rotation(-0.125)
             if self.get_object_at(2)-1 == objID:
@@ -153,57 +141,48 @@ class MedeaController(Controller):
                 self.set_rotation(0.25)
             elif self.get_object_at(1)-1 == objID:
                 self.set_rotation(-0.25)
-            else:
-                self.removeAnchor()
-                return False
         else:
             self.set_rotation(orient)
             if self.get_object_at(3)-1 == objID:
                 self.set_rotation(0.125)
             elif self.get_object_at(1)-1 == objID:
                 self.set_rotation(-0.125)
+            
+            if self.checkHook <= 0:
+                if self.get_object_at(2)-1 != objID and self.get_object_at(3)-1 != objID and self.get_object_at(1)-1 != objID\
+                    and self.euclidean(self.absolute_position, self.lastObj.position)>35:
+                    self.removeAnchor()
+                    self.checkHook = 50
+                    return False
         return True
             
     def isTaken(self, sensr):
         obj = self.get_object_instance_at(sensr)
+        if obj is None: return True
         return obj.taken(self.get_id())
 
     def find(self):
         camera_dist = self.get_all_distances()
-        left = False; right = False
         if camera_dist[1] < 1:  # if we see something on our left
-            if (self.get_object_at(1) != -1 and not self.inZone() and not self.isTaken(1)):# or collab:  # And it is food
+            if (self.get_object_at(1) != -1 and not self.isTaken(1) and not self.inZone()):# or collab:  # And it is food
                 self.set_rotation(-0.5)  # turn left
                 return 1
-            else: left = True
+            else: 
+                self.set_rotation(0.5)
         elif camera_dist[3] < 1:  # Otherwise, if we see something on our right
-            if (self.get_object_at(3) != -1 and not self.inZone() and not self.isTaken(3)):# or collab:
+            if (self.get_object_at(3) != -1 and not self.isTaken(3) and not self.inZone()):# or collab:
                 self.set_rotation(0.5)  # turn right
                 return 3
-            else: right = True
-        if camera_dist[2] < 1:  # if we see something in front of us
-            #collab = False if self.get_robot_controller_at(2) is None else self.get_robot_controller_at(2).assist()
-            if (self.get_object_at(2) != -1 and not self.inZone() and not self.isTaken(2)):# or collab:  # If we are not avoiding obstacle and it's food
+            else: 
+                self.set_rotation(-0.5)
+        elif camera_dist[2] < 1:  # if we see something in front of us
+            if (self.get_object_at(2) != -1 and not self.isTaken(2) and not self.inZone()):# or collab:  # If we are not avoiding obstacle and it's food
                 self.set_rotation(0)
                 return 2
-            elif left:
-                self.set_rotation(1)
-            elif right:
-                self.set_rotation(-1)
-        elif left:
-            self.set_rotation(np.random.choice([0, 0.25]))
-        elif right:
-            self.set_rotation(np.random.choice([0, -0.25]))
+            else: self.set_rotation(np.random.choice([-1, 1]))
         else:
             inputs = self.get_inputs()
             rot_speed = inputs @ self.weights
-            #print("inputs:\n", str(inputs), '\n')
-            #print("========================================")
-            #print("weights:\n", str(self.weights), '\n')
-            #print(str(self.genome))
-            #print("ROTATION SPEEED:", rot_speed, '\n')
-            #print(trans_speed, "AND", rot_speed)
-            self.set_translation(1)
             self.set_rotation(np.clip(rot_speed, -1, 1))
         return -1
 
@@ -216,18 +195,12 @@ class MedeaController(Controller):
     def get_inputs(self):
         dists = self.get_all_distances()
         is_robots = self.get_all_robot_ids() != -1
-        #print(str(is_robots))
         is_walls = self.get_all_walls()
-        #print(str(is_walls))
         is_objects = self.get_all_objects() != -1
-        #print(str(is_objects), '\n')
 
-        robots_dist = np.where(is_robots, dists, 0)
-        #print(str(robots_dist))
-        walls_dist = np.where(is_walls, dists, 0)
-        #print(str(walls_dist))
-        objects_dist = np.where(is_objects, dists, 0)
-        #print(str(objects_dist), '\n', "NEXT", '\n')
+        robots_dist = np.where(is_robots, dists, 1)
+        walls_dist = np.where(is_walls, dists, 1)
+        objects_dist = np.where(is_objects, dists, 1)
 
         landmark_dist = self.get_closest_landmark_dist()
         landmark_orient = self.get_closest_landmark_orientation()
@@ -254,13 +227,10 @@ class MedeaController(Controller):
         else: return False
 
     def new_generation(self):
-        f1 = open("results/\'Dead Robots\'", "a")
-        f1.writelines(self.eulogy())
-        f1.close()
         if self.gList:
             maxNovel = -1
             selected = None
-            birth = "I am robot " + str(self.get_id()) + " and I have " + str(len(self.gList)) + " suitors."
+            birth = "\nI am robot " + str(self.get_id()) + " and I have " + str(len(self.gList)) + " suitors."
             birth += "\nThey are: " + str(list(self.gList.keys()))
             for gene in self.gList:
                 if (self.gList[gene].novelty > maxNovel):
@@ -268,12 +238,10 @@ class MedeaController(Controller):
             birth += "\nMy dad: "+ str(self.genome)+ ", My mom: " + str(selected.genome)
             self.variation(selected)
             birth += "\nOffspring" + str(self.genome) + '\n'
-            self.gList.clear()
-            #self.deactivated = False
+            self.gList.clear();#self.foods.clear()
+            #if self.lastObj is not None: self.removeAnchor()
+            #self.avoid = False; self.seek = True
             self.next_gen_in_it = self.next_gen_every_it
-            f2 = open("results/\'Birthed Robots\'", "a")
-            f2.writelines(birth)
-            f2.close()
         else:
             self.deactivated = True
 
@@ -306,17 +274,51 @@ class MedeaController(Controller):
         self.genome = mutate
         self.set_color(*self.genome)
         self.weights = other.weights.copy()
-        #print(str(self.weights), '\n')
     
     def inspect(self, prefix=""):
         output = "received weights from: \n"
         output += str(list(self.gList.keys()))
         return output
+        
+##################################################################################       
+class MWO(WorldObserver):
+    def __init__(self, world):
+        super().__init__(world)
+        self.rob = Pyroborobo.get()
+        self.timeStart = None
+        self.timeStop = None
+        self.timeGenTen = None
+        self.timeGen5teen = None
+        self.storage = 0
+
+    def init_pre(self):
+        super().init_pre()
+        self.timeStart = time.time()
+    
+    def step_pre(self):
+        super().step_pre()
+        self.storage = 0
+        for obj in self.rob.objects:
+            if obj.robID == -2: self.storage += 1
+        if self.storage == 25 or self.rob.iterations == 5997: 
+            if self.timeGenTen is None:
+                self.timeStop = time.time()
+                secs = self.timeStop - self.timeStart
+                self.timeGenTen = time.strftime("%M minute(s), %S seconds", time.gmtime(secs))
+                self.timeStart = time.time()
+
+    def step_post(self):
+        super().step_post()
+        if self.storage == 50 or self.rob.iterations == 8998: 
+            if self.timeGen5teen is None:
+                self.timeStop = time.time()
+                self.timeGen5teen = time.strftime("%M minute(s), %S seconds", time.gmtime(self.timeStop - self.timeStart))
+            
 
 ##################################################################################
 
 class Food(MovableObject):
-    def __init__(self, id_, data):
+    def __init__(self, id_, data=None):
         MovableObject.__init__(self, id_)  # Do not forget to call super constructor
         self.rob = Pyroborobo.get()
         self.dropZoneX, self.dropZoneY = np.array(self.rob.arena_size) *0.65
@@ -352,6 +354,7 @@ class Food(MovableObject):
         else: return False
 
     def taken(self, rob_id):
+        if self.robID == -2: return True
         if self.type == 1:
             if self.robID == -1: return False
             elif self.robID != rob_id: return True
@@ -361,7 +364,7 @@ class Food(MovableObject):
         elif self.type == 3:
             if len(self.robs) < 3: return False
             else: return True
-        else: return False
+        return False
 
     def removeAnchor(self, rID):
         if len(self.robs) == 1:
@@ -376,7 +379,9 @@ class Food(MovableObject):
         elif self.type == 2: rType = "B"
         else: rType = "C"
         robs = str(self.robs)
-        return f"Resource {id} of type: {rType} has been stored by robots {robs} \n"
+        if self.robID == -2:
+            return f"\nResource: {id} \nType: {rType} \nStored: True \nRobots: {robs} \n"
+        else: return f"\nResource: {id} \nType: {rType} \nStored: False\n"
 
     def is_pushed(self, rob_id, speed):
         if rob_id >= self.rob.robot_index_offset:
@@ -404,23 +409,62 @@ class Food(MovableObject):
                         #robot.foods.add(self.get_id())
                         self.robs.add(robot.get_id())
                     return
+            if self.robID == -2: return
         super().is_pushed(rob_id, speed)
 
     def inspect(self, prefix=""):
         return f"""I am {self.get_id()} with {len(self.robs)} pushing me: {str(self.robs)}""" #f"""I'm a Food with id: {self.id}"""
 
 def main():
+    f3 = open("results/Experiments.txt", "a")
+    f3.close()
     rob = Pyroborobo.create("config/NSmEDEA.properties",
                             controller_class=MedeaController,
+                            world_observer_class=MWO,
                             object_class_dict={'_default': Food})
-    f1 = open("results/\'Dead Robots\'", "w+")
-    f2 = open("results/\'Birthed Robots\'", "w+")
-    f3 = open("results/\'Stored Items\'", "w+")
     rob.start()
-    rob.update(10000)
-    rob.close()
+    rob.update(6000)
+    timeGenTen = rob.world_observer.timeGenTen
+    resIdx = 51
+    for i in range(25):
+        rob.add_object(Food(resIdx))
+        resIdx+=1
+    rob.update(4200)
+    timeGen5teen = rob.world_observer.timeGen5teen
+
+    activeRobs = 0
+    storedItems = {"A":0, "B":0, "C":0}
+    robStatus = ""; resourceStatus = ""
+    for robot in rob.controllers:
+        if not robot.deactivated:
+            activeRobs +=1
+        robStatus += robot.eulogy()
+    for item in rob.objects:
+        if item.robID == -2:
+            if item.type == 1:
+                storedItems["A"] += 1
+            elif item.type == 2:
+                storedItems["B"] += 1
+            elif item.type == 3:
+                storedItems["C"] += 1
+        resourceStatus += item.stored()
+    f1 = open("results/Robots", "w")
+    f2 = open("results/Resources", "w")
+    f1.write(robStatus)
+    f2.write(resourceStatus)
     f1.close()
     f2.close()
+    rob.close()
+    f3 = open("results/Experiments.txt", "r+")
+    if f3.read(1) == "\n":
+        exNum = int(f3.readlines()[-5][11:]) + 1
+    else: exNum = 1
+    C = [f"\nExperiment {exNum}",
+    f"\nAfter 12000 iterations, there are {activeRobs} active robots out of 150. {150 - activeRobs} are dead.\n",
+    f"There are {sum(list(storedItems.values()))} stored resources stored out of 25. Specifically {str(storedItems)}\n",
+    f"Time lapsed moving 25 resources in the first 10 generations was {timeGenTen}\n",
+    f"Time lapsed moving 25 resources in the following 7 generations was {timeGen5teen}\n"]
+    f3.writelines(C)
     f3.close()
 
 
