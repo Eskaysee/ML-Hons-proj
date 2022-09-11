@@ -1,6 +1,5 @@
 from pyroborobo import Pyroborobo, Controller
 import numpy as np
-import time
 
 class MedeaController(Controller):
 
@@ -21,7 +20,6 @@ class MedeaController(Controller):
         self.dropZoneX, self.dropZoneY = np.array(self.rob.arena_size) *0.65
         self.foods = set()
         self.lastObj = None
-        self.novelty = 0            #combination of 'sociability' and distance metrics as unique behaviour 
         self.skipSteps = 5
         self.checkHook = 50
 
@@ -49,8 +47,7 @@ class MedeaController(Controller):
             if self.lastObj is not None:
                 if not self.lastObj.inZone(): self.removeAnchor()
         
-        elif self.next_gen_in_it < 0:
-            self.novelty = self.distMetric(10) * self.mates()
+        elif self.next_gen_in_it < 3:
             self.new_generation()
             #self.next_gen_in_it = self.next_gen_every_it
 
@@ -66,6 +63,9 @@ class MedeaController(Controller):
                     self.ditch = 25
             elif self.seek:
                 self.find() #cam = self.find()
+                #if self.inZone():
+                #    self.leave()
+                #    self.ditch = 25
             else:
                 self.seek = self.drop()
                 if self.wait <=0 :
@@ -73,7 +73,6 @@ class MedeaController(Controller):
                     self.wait = 100
             # Share weights
             self.broadcast()
-            self.novelty = self.distMetric(10) * self.mates()
 
     def removeAnchor(self):
         self.lastObj.removeAnchor(self.get_id())
@@ -124,7 +123,6 @@ class MedeaController(Controller):
         return f"""\nRobot: {id}\
             \nTotal resources """ + str(len(self.foods)) + f""": {foods}\
             \nTotal suitors """ + str(len(self.gList)) + f""": {suitors}\
-            \nNovelty: {self.novelty}\
             \nColour: {colour}\n"""
 
     def navigate(self, objID):
@@ -229,33 +227,19 @@ class MedeaController(Controller):
 
     def new_generation(self):
         if self.gList:
-            selected = None; maxNovel = -1
-            for gene in self.gList:
-                if self.gList[gene].novelty > maxNovel:
-                    selected = self.gList[gene]
-                    maxNovel = selected.novelty
+            randKey = np.random.choice(list(self.gList.keys()))
+            selected = self.gList[randKey]
             self.variation(selected)
             self.gList.clear()
             self.next_gen_in_it = self.next_gen_every_it
         else:
             self.deactivated = True
-    
-    def distMetric(self, space):
-        k = space
-        distances = []
-        for genome in self.gList:
-            distances.append(self.euclidean(self.absolute_position, self.gList[genome].absolute_position))
-            if (len(distances) == k): break
-        return sum(distances)//k
-    
+
     def euclidean(self, coord1, coord2):
         x = (coord1[0]-coord2[0])**2
         y = (coord1[1]-coord2[1])**2
         return np.sqrt(x+y)
-
-    def mates(self):
-        return len(self.gList)
-    
+   
     def variation(self, other):
         parent2 = other.genome.copy()
         parent1 = self.genome
