@@ -239,3 +239,4 @@ Roborobo (C++) examples can be found in the <your_roborobo_folder>/prj directory
 ___
 
 _Thank you for using Roborobo!_
+# swarm_noveltySearch
