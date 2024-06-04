@@ -1,0 +1,177 @@
+body {
+    line-height: 1.6;
+    background-color: #ededed;
+}
+
+.navbar {
+    background-color: #1D3159;
+}
+
+.container {
+    padding: 25px 0px
+}
+
+.container h1 {
+    margin-bottom: 45px;
+}
+
+.overview .figure {
+    margin: 25px auto;
+}
+.medea, .project-downloads {
+    background-color: #43516C;
+    color: white;
+}
+
+.objective .primary-objective {
+    margin-bottom: 40px;
+}
+
+.objective .method-box {
+    display: block;
+    background-color: #f5f5f5;
+    height: 435px;
+    margin-bottom: 25px;
+}
+
+.map-elites-title {
+    background-color: #43516C;
+    padding: 25px 45px;
+    color: #f5f5f5;
+}
+
+.map-elites-container {
+    background-color: #43516C;
+}
+
+.map-elites-container-alternate {
+    background-color: #f5f5f5;
+}
+
+.map-elites-methods {
+    background-color: #f5f5f5;
+    padding: 25px 45px;    
+}
+
+.map-elites-implementation {
+    background-color: #f5f5f5;
+    padding: 25px 45px;
+}
+
+.map-elites-task-environment {
+    background-color: #43516C;
+    padding: 25px 45px;
+}
+
+.map-elites-results {
+    background-color: #f5f5f5;
+    padding: 25px 45px;
+}
+
+.map-elites-images-container {
+    background-color: #43516C;
+    padding: 25px 45px;
+    color: #f5f5f5;
+}
+
+.center-image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 25px;
+    width: 80%;
+}
+
+.center-function {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 30%;
+}
+
+.main-method {
+    width: 80%;
+}
+
+.main-method h1 {
+    margin-bottom: 0;
+    color: #1D3159;
+}
+
+.main-method .lead {
+    font-size: 28px;
+}
+
+.main-method h3 {
+    margin: 25px 0 15px 0;
+}
+
+.main-method .graphs {
+    width: 100%;
+}
+
+.main-method .graph {
+    width: 60%;
+    margin: 40px auto;
+}
+
+.main-method .graph img {
+    width: 100%;
+}
+
+.project-downloads {
+    padding-bottom: 30px;
+}
+
+.project-buttons {
+    width: 95%;
+    margin: auto;
+}
+
+.project-buttons a {
+    width: 220px;
+    padding: 10px;
+    margin: 15px 20px;
+}
+
+.method-downloads .method-box {
+    display: block;
+    background-color: #f2f2f2;
+    height: 350px;
+    margin-bottom: 25px;
+}
+
+.method-downloads .method-box .method-buttons {
+    width: 250px;
+    margin: auto;
+}
+
+.method-downloads .method-box .method-buttons a {
+    width: 220px;
+    padding: 10px;
+    margin: 15px 0px;
+}
+
+footer {
+    height: auto;
+    background-color: #677CA6;
+    color: white;
+}
+
+footer h3, p {
+    margin: 0;
+}
+
+footer h3 {
+    font-size: 20px;
+}
+
+footer .footer-col {
+    margin: 20px 0px;
+}
+
+@media only screen and (max-width: 900px){
+	.main-method .graph {
+        width: 90%;
+    }
+}

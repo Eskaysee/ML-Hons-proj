@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>SWARM</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="styles/bootstrap.min.css">
+        <link rel="stylesheet" href="styles/styles.css">
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="index.html">Home</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="mapelites.html">MAP-Elites</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="noveltysearch.html">Novelty Search</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Novelty Search with Local Competition</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="downloads.html">Downloads</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+
+        <div class="container main-method">
+            <h1>Novelty Search with Local Competition</h1>
+            <p class="lead">Bailey Green</p>
+
+            <h3>Background</h3>
+            <p>Competition between agents is a powerful technique that is often used in artificial intelligence. Novelty Search with local competition aims to 
+            expand on the behavioural-based approach of Novelty Search, where the aim is to find unique behaviours amongst the robots, by introducing competition among behaviours that 
+            are similar. By having competition among behaviours that are similar, where the behaviour that performs the best at the designated task is selected, novelty search with local
+            competition is able to improve on novelty search. It still benefits from finding unique behaviours resulting in diverse solutions but additionaly allows higher performing solutions.
+            Novelty search and local compeition was hybridized with the mEDEA (environment-adaptation method) and compared against the mEDEA method in a collective gathering task.
+            </p> 
+            
+            <br>
+
+            <p>In the collective gathering task, 75 resources were randomly located in the environment and 100 robots then had to find and push those resources into the designated zone. 
+              Three different sized resources were used, small, medium and large. The small, medium and large resources required one, two and three robots to push them respectively. 
+              Using different proportions of these resources three task environments of easy, medium and hard difficulties were created. The hybrid novelty search with local competition
+              method was than compared against the base mEDEA method on each of these task environments for 20 runs.  
+            </p>
+
+            <h3>Research Objective</h3>
+
+            <p>The primary research objective for the paper is comparing the hybrid novelty search with local compeition method with mEDEA to determine the best
+              method for evolving problem-solving collective behaviour and functional diversity in swarm robotics</p>
+
+            <br>
+
+            <p>The goal is to maximise the performance and diversity of the solutions while still providing environment adaptation. Various metrics were recorded in order to compare the
+              performance and diversity between the two methods.
+            </p>
+
+            <h3>Results</h3>
+
+            <p>When comparing the performance the average maximum number of resources pushed into the gathering zone and the average time taken to complete the task for each task environment
+              was compared between the two methods. As seen in Figure 1 and Figure 2, both methods performed very similarly. Upon conducting a independent t-test with a signifigance level of
+              p=0.05, no significant difference between the performance of the two methods could be seen.
+            </p>
+
+            <br>
+
+            <p>The diversity was compared by looking at the average distance of the swarm to the center of the gathering zone for each task environment. The behavioural diversity was slightly
+              harder to compare than the performance due to it being difficult to judge what classifies is a different behaviour. As can be seen in Figure 3, the results from this test were again 
+              fairly similar however upon doing a independent t-test with a signifigance level of p=0.05, a difference between the methods in the easy and hard difficulty were found but not in the 
+              medium difficulty. It is hard to interpret whether this results in a difference in behvaioural diversity. We concluded there was no difference in behavioural diversity due to not enough
+              evidence being found. Further tests were done and the results of those are shown in the Github repo (link in the downloads page).
+            </p>
+
+            <br>
+
+            <p>We concluded there was no significant difference in performance or behavioural diversity between the hybrid novelty search with local competition method and the mEDEA method for
+              this collective gathering task. We still believe our hybridized method has the potential to outperform the mEDEA method in more complex tasks in which the strengths of novelty
+              search and local competition will shine through. This is where we think further research needs to be done for determining the best method for evolving problem-solving collective 
+              behaviour and functional diversity in swarm robotics.
+            </p>
+
+            <div class="graphs">
+              <div class="graph">
+                <img src="imgs/nslc-perf-1.jpg" alt="Average Maximum Number of Resources Pushed Graph">
+                <p><b>Figure 1:</b> Bar graph showing the average maximum number of
+                  resources pushed into the gathering zone as a portion of the total
+                  number of resources for each method and task environment</p>
+              </div>
+
+              <div class="graph">
+                <img src="imgs/nslc-perf-2.jpg" alt="Average Time Taken To Complete Task Graph">
+                <p><b>Figure 2:</b> Bar graph showing the time taken to complete the task as
+                  a portion of the total simulation time for each method and task
+                  environment</p>
+              </div>
+
+              <div class="graph">
+                <img src="imgs/nslc-div-1.jpg" alt="Average Distance of Swarm To Gathering Zone Graph">
+                <p><b>Figure 3:</b> Bar graph showing the average distance of the swarm to
+                  the center of the gathering zone for each method and task
+                  environment to measure behavioural diversity of the swarm</p>
+              </div>
+            </div>
+
+        </div>
+
+        <footer>
+          <div class="container">
+            <div class="row text-center">
+              <div class="col-6 col-lg-3 footer-col">
+                <img src="imgs/uct-logo.png" width="150" alt="UCT Logo">
+              </div>
+
+              <div class="col-6 col-lg-3 footer-col">
+                <h3>University Of Cape Town</h3>
+                <p>Computer Science Department</p>
+                <p>Email: dept@cs.uct.ac.za</p>
+                <p>Phone: 021 650 2663</p>
+              </div>
+
+              <div class="col-6 col-lg-3 footer-col">
+                <h3>Team Members</h3>
+                <p>Kevaalin Rapeti</p>
+                <p>Sihle Calana</p>
+                <p>Bailey Green</p>
+                <h3>Project Supervisor</h3>
+                <p>Dr. Geoff Nitschke</p>
+              </div>
+
+              <div class="col-6 col-lg-3 footer-col">
+                <img src="imgs/cs-logo.png" width="150" alt="UCT Computer Science Logo">
+              </div>
+            </div>
+          </div>
+        </footer>
+        
+        <script src="scripts/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

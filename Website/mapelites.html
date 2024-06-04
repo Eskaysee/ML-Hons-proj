@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>SWARM</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="styles/bootstrap.min.css">
+        <link rel="stylesheet" href="styles/styles.css">
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="index.html">Home</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">MAP-Elites</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="noveltysearch.html">Novelty Search</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="nslc.html">Novelty Search with Local Competition</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="downloads.html">Downloads</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+          
+        <div class="overview">                                              
+            <div class="container main-method">
+              <h1>MAP-Elites</h1>
+              <p class="lead">Kevaalin Rapeti</p>
+            </div>
+        </div>
+
+        <div class="map-elites-container">
+            <div class="row gx-5">                            
+              <div class="col-xl-6">
+                <div class="map-elites-title">
+                  <p>
+                    Map-elites is a quality diversity algorithm, a type of algorithm that focuses on creating a diverse collection of 
+                    high-quality behaviours. The user chooses a performance measure for the simulation, then creates an N-dimensional 
+                    feature space which will determine the variations of interest for the user. Each of the dimensions found in the 
+                    feature space is then given a valuation, in order to determine a priority ranking, and over each generation the 
+                    algorithm checks for the highest performing “cell” in the feature space to determine which are the best performing 
+                    solutions of that generation. As shown in the images below, the image on the left represents a high-dimensional 
+                    space and the image on the right represents the collection of possible candidate solutions. Where we can then 
+                    search for local optima as the starting points for future generations of the swarm.
+                  </p>
+                </div>                
+              </div>
+              <div class="col-xl-6">          
+                <img src="imgs/map-elites-hq.png" alt="" class="center-image">                               
+              </div>
+            </div>
+        </div>
+
+        <div class="map-elites-container-alternate">          
+          <div class="row gx-5">
+            <div class="col-xl-6">
+              <div class="map-elites-methods">
+                <h2 class="text-center">Methods</h2>
+                <h6>Approach</h6>
+                <p>
+                  To carry out this experiment, a 2-D simulator called roborobo was used to simulate the physical environment, 
+                  the resources and the robots in the swarm. For this experiment, two robot controllers were designed, one running 
+                  the base mEDEA algorithm and the second running a hybrid algorithm of mEDEA and MAP-Elites. During the simulation, 
+                  the robots communicate with each other and pass on their genomes to each robot them encounter.
+                </p>
+                <br>
+                <h6>Controller Design</h6>
+                <p>
+                  The controllers were designed with a set of heuristics to determine the general behaviour of each robot in the 
+                  swarm, such as navigation, collection, abandoning tasks or waiting for help for certain tasks.
+                </p>
+                <br>
+                <h6>Fitness Function</h6>
+                <p>
+                  A fitness function was designed for these functions which looked at the ability of each controller to explore 
+                  its environment and to transport resources in the environment.
+                </p>
+                <br>
+                <img src="imgs/map-elites-fitness-function.png" alt="" class="center-function">
+                <br>
+                <p>Where TD is the total displacement of a robot from its starting position, MD is the maximum displacement a 
+                   robot can move based on the size of the environment and RD is the resource distance which states how far a 
+                   robot has travelled whilst pushing a resource.
+                </p>
+              </div>              
+            </div>
+            <div class="col-xl-6">
+              <div class="map-elites-implementation">
+                <h2 class="text-center">Implementation</h2>
+                <h6>Experiment Design</h6>
+                <p>
+                  The experiment shall test the performance of the MEDEA algorithm against the hybrid algorithm at collective 
+                  gathering tasks of increasing complexity. The experiment will test the capabilities of the swarm at locating 
+                  and transferring resources in the environment to a predefined target area. The changing complexity will be 
+                  done adding resources into the environment that require multiple robots in order to move in the environment, 
+                  allowing for the collaborative ability of the swarm to be tested.
+                </p>
+                <br>
+                <h6>Environment Design</h6>
+                <p>
+                  The experiment shall be done in a virtual environment; this virtual environment is created from the roborobo 
+                  simulator. The experiment shall occur in the same environmental conditions for all three complexity levels, 
+                  which will be 2 dimensional, flat environment, which shall be call the testing arena.
+                </p>
+                <br>
+                <h6>Resource Design</h6>
+                <p>
+                  Resources can are designed to be one of three different categories, type A, B or C. Type A resources are 
+                  designed to be moved by any number of robots, whereas type B requires 2 robots and type C requires 3 robots 
+                  to move in the environment.
+                </p>
+              </div>              
+            </div>            
+          </div>          
+        </div>
+
+        <div class="map-elites-images-container">         
+          <div class="row gx-5">
+            <div class="col-xl-4">
+              <div class="map-elites-task-environment">
+                <h4 class="text-center">Task Environments</h4>
+                <img src="imgs/map-elites-task-environments.png" alt="" class="center-image">
+              </div>
+            </div>
+
+            <div class="col-xl-4">
+              <div class="map-elites-task-environment">
+                <h4 class="text-center">mEDEA Parameters</h4>
+                <img src="imgs/map-elites-medea-parameters.png" alt="" class="center-image">
+              </div>
+            </div>
+
+            <div class="col-xl-4">
+              <div class="map-elites-task-environment">
+                <h4 class="text-center">Hybrid Parameters</h4>
+                <img src="imgs/map-elites-hybrid-parameters.png" alt="" class="center-image">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="map-elites-container">
+          <div class="map-elites-results">
+            <h2 class="text-center">Results</h2>
+            <div class="row gx-5">
+              <div class="col-xl-6">              
+                <p>
+                  Results show that on average the hybrid algorithm do perform slightly better than the base mEDEA algorithm, 
+                  but after performing a p-test, this improvement in performance is not considered significant enough of an 
+                  improvement. This better performance can be accredited to the design of the MAP-Elites used to encourage the 
+                  evolution of more variation in the swarm at later generations. I believe that there are improvements that can 
+                  be made to the experiments and research I have done, changes to the robot controller design as well as more 
+                  complex iterations of the MEDEA and MAP-Elites algorithm which could possible produce better results and that 
+                  this future research should be conducted to explore the capabilities of it as an evolutionary algorithm for 
+                  swarm robotics.
+                </p>
+              </div>
+              <div class="col-xl-6">
+                <img src="imgs/map-elites-results.png" alt="" class="center-image">
+              </div>
+            </div>            
+          </div>
+
+          <footer>
+            <div class="container">
+              <div class="row text-center">
+                <div class="col-6 col-lg-3 footer-col">
+                  <img src="imgs/uct-logo.png" width="150" alt="UCT Logo">
+                </div>
+  
+                <div class="col-6 col-lg-3 footer-col">
+                  <h3>University Of Cape Town</h3>
+                  <p>Computer Science Department</p>
+                  <p>Email: dept@cs.uct.ac.za</p>
+                  <p>Phone: 021 650 2663</p>
+                </div>
+  
+                <div class="col-6 col-lg-3 footer-col">
+                  <h3>Team Members</h3>
+                  <p>Kevaalin Rapeti</p>
+                  <p>Sihle Calana</p>
+                  <p>Bailey Green</p>
+                  <h3>Project Supervisor</h3>
+                  <p>Dr. Geoff Nitschke</p>
+                </div>
+  
+                <div class="col-6 col-lg-3 footer-col">
+                  <img src="imgs/cs-logo.png" width="150" alt="UCT Computer Science Logo">
+                </div>
+              </div>
+            </div>
+          </footer>
+        
+        <script src="scripts/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>SWARM</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="styles/bootstrap.min.css">
+    <link rel="stylesheet" href="styles/styles.css">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="mapelites.html">MAP-Elites</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Novelty Search</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="nslc.html">Novelty Search with Local Competition</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="downloads.html">Downloads</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+  <div class="container main-method">
+      <h1>Novelty Search</h1>
+      <p class="lead">Sihle Calana</p>
+      
+      <h3>What is Novelty Search?</h3>
+      <p>Novelty Search is an evolutionary algorithm that rewards robotic agents in a swarm for performing a atypical, extraordinary or abnormal behaviour instead of based on 
+        an objective fitness functions. This is especially useful when solving problems that have seemingly clear solutions. For example the goal of the Chinese finger trap is
+        to free your fingers. It is ones naturally one would instinctively want to just pull your fingers away from each other (the objective), however this would further entrap your fingers.
+        Only when attempting something unusual or unique, like alternating between pushing your fingers closer together and pulling them further apart is one finally
+        able to free their fingers.
+      </p> 
+      
+      <br>
+
+      <p>In the context robots in a swarm, novelty search aids in providing an additional method of evaluating evolutionary algorithm solutions besides only using 
+        the objective fitness function. This promotes a more lateral approach to problem solving. This also promotes behavioural diversity as original behaviour is
+        encouraged.
+      </p>
+
+
+      <div class="row gx-5">
+        <div class="col-xl-6">
+          <h3 class="text-center">Experiment Goals & Methods</h3>
+          <p>The aim of our research is to optimise the speed robots adapt to changes in their environment, whilst still maximising the efficiency of objective
+            completion through generating cooperative behaviour.
+            We aimed to achieve this through hybridizing two evolutionary algorithms, Novelty Search and mEDEA algorithm.
+            In a simulation, robots were tasked with foraging while also looking for mates to pass on its genes (behaviour). There were 3 types of resources:
+            A (light), B (intermediate) & C (heavy). Type A required one robot to push it, type B 2 and type C 3. For each environment the experiment was run 3 times eachtime alternating robot controllers designs.
+            these designs involved mEDEA with random selection, fitness-based mEDEA algorithm and the mEDEA algorithm hybridised with novelty search. Every robot also had 
+            hueristics to follow under certain conditions (pick up, ditch, transport and drop resource). Every robot also had a fitness
+            funtion the measured the sum of the value of the resources a robot stored. Resource A was worth 1, resource B worth 2 & resource C worth 3.
+            This was run in 2 seperate environments, each run several times.
+            The first one involved 200 robots and 100 resources of varying types in an arena. The large number of robots chosen for this environment was to ensure
+            robot deaths were minimised. The large number of resources was to ensure as many robots as possible encounter at least one resource.
+            The second environment was more sparse and there were only 100 robots and 50 resources. It starts off with just 15 resources for the first 5 generations
+            then an additional 35 resources are added in the following 5 generations. This was to give the robots time to adapt and explore the environment before having to
+            gather the bulk of the resources. This was also to measure how well robots adapted to changes in their environment. The time taken to store resources
+            was measured in the first and the last 5 generations for comparison.
+            Thus we measured:
+            <li>The number of active robots</li>
+            <li>The value of the resources gathered</li>
+            <li>The time taken to store resources in the earlier and later generations</li>
+          </p>
+        </div>
+        <div class="col-xl-6">
+          <h3 class="text-center">Tools & Experiment Parameters</h3>
+          <p>The robot simulator, called roborobo was used to run our experiments. It simulated e-puck robots. The simulator was extracted from Nicholas Bredeche GitHub repository. A lot of the
+            physics for how resources and robots interacted with the environment was built in and mostly coded using C++ and uses the SDL2 graphics library. The
+            code concerning the experiments was coded in python. Below are some of the experiment parameters:
+            <img src="imgs/ns-expParameters.png" alt="Experiment Table">
+          </p>
+        </div>            
+      </div>
+
+
+      <h3>Results</h3>
+      <p>
+        In the first environment, the novelty search-based mEDEA hybridised algorithm had slightly more active robots than the fitness based algorithm (see Figure 1)
+        and stored slightly more resources than the random based algorithm (see Table 2). This was possibly due the novelty search mEDEA hybrid being better and handling
+        the trade off between the mission objective (foraging resource) and the environment objective (exploring & spreading its genomes - what determines its behaviour).
+        <br>
+        The second experiment showed the novelty search-based mEDEA hybrid algorithm had the greatest improvement in time taken to gather resources, possibly indicating
+        it being better at adapting to changes in the environment. The overall value of the resources were also values higher for the hybrid algorithm compared to the other
+        two robot controller designs. This means more type B and C resources were gathered, thus indicating improved collaboration between robots. This was, however, a very
+        slight improvement.
+      </p>
+      <br>
+      <p>
+        The results for The hybridised algorithm - mEDEA algorithm with Novelty Search align with the objectives of our research stated earlier.The
+        effectiveness of the hybridisation should be tested further as the number of tests that were run for each controller in each environment was 
+        minimal due to time constraints. Improvements were observed, although the degree of the improvements were less than satisfactory. The robot controllers
+        also had room for improvement with regards to directly heading to the gathering zone (without detours) when collecting an object. These changes may produce more 
+        concrete results.
+        It would be of interest to the field of evolutionary swarm robotics collaborative problem solving to see how controllers using the
+        hybridisation operate in collective formation tasks. This combined with foraging may be of great use for building
+        construction in the future and could serve useful in physical robots.
+      </p>
+
+
+      <div class="graphs">
+        <div class="graph">
+          <img src="imgs/ns-exp1-storage.png" alt="Environment 2 Resource Storage">
+          <p><b>Table 2:</b> Sample of the table displaying the number of the objects stored per
+            generation in Environment 1.</p>
+          <img src="imgs/ns-activeRobs-exp1.png" alt="Active Robots for environment 1">
+          <p><b>Figure 1:</b> Line graph showing The number of active robots over 20 generations
+            in Environment 1 for each robot controller type.</p>
+        </div>
+
+        <div class="graph">
+          <img src="imgs/ns-storage-exp2.png" alt="Environment 2 Resource Storage">
+          <p><b>Figure 2:</b> Bar chart showing the time taken to complete the task and the number of resources
+            store for second task environment. The performances of the 3 different robot controllers are compared.
+        </p>
+        </div>
+      </div>
+
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="row text-center">
+        <div class="col-6 col-lg-3 footer-col">
+          <img src="imgs/uct-logo.png" width="150" alt="UCT Logo">
+        </div>
+        <div class="col-6 col-lg-3 footer-col">
+          <h3>University Of Cape Town</h3>
+          <p>Computer Science Department</p>
+          <p>Email: dept@cs.uct.ac.za</p>
+          <p>Phone: 021 650 2663</p>
+        </div>
+        <div class="col-6 col-lg-3 footer-col">
+          <h3>Team Members</h3>
+          <p>Kevaalin Rapeti</p>
+          <p>Sihle Calana</p>
+          <p>Bailey Green</p>
+          <h3>Project Supervisor</h3>
+          <p>Dr. Geoff Nitschke</p>
+        </div>
+
+        <div class="col-6 col-lg-3 footer-col">
+          <img src="imgs/cs-logo.png" width="150" alt="UCT Computer Science Logo">
+        </div>
+      </div>
+    </div>
+  </footer>   
+    <script src="scripts/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

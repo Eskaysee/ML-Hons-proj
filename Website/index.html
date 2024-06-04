@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>SWARM</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="styles/bootstrap.min.css">
+        <link rel="stylesheet" href="styles/styles.css">
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="mapelites.html">MAP-Elites</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="noveltysearch.html">Novelty Search</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="nslc.html">Novelty Search with Local Competition</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="downloads.html">Downloads</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+        
+          <div class="overview">
+            <div class="container">
+                <h1 class="text-center">Overview</h1>
+                <p class="text-center">Swarm robotics is a complex and constantly evolving field. It is an application of swarm intelligence which follows the
+                  behaviours of a group of interacting agents. These agents have behavioural and functional diversity, which helps the
+                  swarm in accomplishing their tasks. However, an issue with swarms is that they must be heavily configured for
+                  environments to be effective at their tasks, thus the problem of using robotic swarms in unknown environments. A
+                  solution to this is the use of evolutionary algorithms to evolve the swarms and allow them to adapt easily to
+                  unknown environments.</p>
+                  <br>
+                <p class="text-center">In our project we will be designed and evaluated three different hybrid evolutionary methods to attempt to solve a simple
+                  collective gathering task (figure shown below). In this task the swarm of robots must find and push resources randomly scattered across the environment into a designated zone.
+                  The resources have three different sizes, small, medium and large, which require one, two and three robots to push respectively. Using combinations of These
+                  resource sizes different complexities of the task could be created and tested. 
+                </p>
+
+                <div class="figure d-flex justify-content-center">
+                  <img src="imgs/task.jpg" alt="Image to show collective gathering task">
+                </div>
+              </div>
+          </div>
+
+          <div class="medea">
+            <div class="container">
+                <h1 class="text-center">mEDEA Method</h1>
+                <p class="text-center">The mEDEA, a minimal environment-driven distributed evolutionary
+                  adaptation algorithm, provides a way of dealing with complex changing or unknown environments. It is the base 
+                algorithm we will be hybridizing in all three research objectives (See Below)</p>
+
+                <br>
+
+                <p class="text-center">This algorithm is implemented by having a
+                  genome which is controlling an agent throughout a generation.
+                  Initially this genome is randomly initialized. Each generation the
+                  genome is loaded onto the agent and as long as that genome is not
+                  empty and the agent has energy, the agent will move around the
+                  environment and broadcast its genome to other agents in a certain
+                  proximity. At the end of each generation the
+                  current genome is emptied. There are then three operators that are
+                  then used to find a new active genome for each agent. The
+                  selection operator finds a random subset from the list of genomes
+                  the agent has received from other agents. The variation operator
+                  then applies some mutation to these genomes in order to modify
+                  them slightly. Usually, this modification is very minor. Finally, a
+                  replacement operator is used to randomly select the new active
+                  genome to control the agent for the next generation and the list of
+                  genomes the agent received is emptied</p>
+              </div>
+          </div>
+
+          <div class="objective">
+            <div class="container">
+                <h1 class="text-center">Research Objective</h1>
+                <p class="text-center primary-objective">The primary research objective for this project is determining the best
+                  method for evolving problem-solving collective behaviour and functional
+                  diversity in swarm robotics. To do this we each took the mEDEA method
+                  and used it as base, combining it with other behaviour-based
+                  evolutionary methods to form hybrid methods. The three hybrid methods
+                  were then compared against mEDEA in a collective
+                  gathering task of various difficulties:</p>
+    
+                <div class="row gx-5">
+                  <div class="col-12 col-xl-4">
+                    <div class="p-5 shadow rounded method-box text-center d-flex flex-column">
+                      <h4>MAP-Elites</h4>
+                      <p class="lead">Kevaalin Rapeti</p>
+                      <p>MAP-Elites is a quality diversity
+                        algorithm that creates a diverse
+                        collection of behaviours. We define
+                        a set of performance measures to
+                        determine the robot design and
+                        create an N-dimensional vector of
+                        interests to evaluate the robot.
+                        High-performing individuals are
+                        selected and used for our next
+                        generation of robots.</p>
+                      <a class="btn btn-primary mt-auto" href="mapelites.html" role="button">Learn More</a>
+                    </div>
+                  </div>
+                  
+                  <div class="col-12 col-xl-4">
+                      <div class="p-5 shadow rounded method-box text-center d-flex flex-column">
+                          <h4>Novelty Search</h4>
+                          <p class="lead">Sihle Calana</p>
+                          <p>Novelty Search is an evolutionary
+                            algorithm that promotes passing
+                            on robot behaviour that is atypical
+                            or abnormal from the rest of the
+                            swarm. This uses a more lateral
+                            approach to solving problems
+                            with deceptively complex
+                            solutions.</p>
+                          <a class="btn btn-primary mt-auto" href="noveltysearch.html" role="button">Learn More</a>
+                      </div>
+                  </div>
+                  <div class="col-12 col-xl-4">
+                      <div class="p-5 shadow rounded method-box text-center d-flex flex-column">
+                          <h4>Novelty Search with Local Competition</h4>
+                          <p class="lead">Bailey Green</p>
+                          <p>Novelty Search with Local Competition (NSLC) expands on novelty search
+                            by adding local competition where
+                            agents which have similar
+                            behaviours will compete against
+                            one another. This allows NSLC to
+                            have a high diversity while still
+                            having high performing solutions.</p>
+                          <a class="btn btn-primary mt-auto" href="nslc.html" role="button">Learn More</a>
+                      </div>
+                  </div>
+                </div>
+              </div>
+          </div>  
+
+          <footer>
+            <div class="container">
+              <div class="row text-center">
+                <div class="col-6 col-lg-3 footer-col">
+                  <img src="imgs/uct-logo.png" width="150" alt="UCT Logo">
+                </div>
+  
+                <div class="col-6 col-lg-3 footer-col">
+                  <h3>University Of Cape Town</h3>
+                  <p>Computer Science Department</p>
+                  <p>Email: dept@cs.uct.ac.za</p>
+                  <p>Phone: 021 650 2663</p>
+                </div>
+  
+                <div class="col-6 col-lg-3 footer-col">
+                  <h3>Team Members</h3>
+                  <p>Kevaalin Rapeti</p>
+                  <p>Sihle Calana</p>
+                  <p>Bailey Green</p>
+                  <h3>Project Supervisor</h3>
+                  <p>Dr. Geoff Nitschke</p>
+                </div>
+  
+                <div class="col-6 col-lg-3 footer-col">
+                  <img src="imgs/cs-logo.png" width="150" alt="UCT Computer Science Logo">
+                </div>
+              </div>
+            </div>
+          </footer>
+        
+        <script src="scripts/bootstrap.bundle.min.js"></script>
+    </body>
+</html>
