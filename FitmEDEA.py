@@ -264,7 +264,8 @@ class MedeaController(Controller):
             mutate[i] = (v1[i] + v2[i])//2
         self.genome = mutate
         self.set_color(*self.genome)
-        self.weights = other.weights.copy()
+        new_weights = other.weights.copy()
+        self.weights = np.random.normal(new_weights, 0.1   )
     
     def inspect(self, prefix=""):
         output = "received weights from: \n"

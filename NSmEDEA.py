@@ -1,6 +1,6 @@
 from pyroborobo import Pyroborobo, Controller
 import numpy as np
-import time
+
 
 class MedeaController(Controller):
 
@@ -14,6 +14,8 @@ class MedeaController(Controller):
         self.deactivated = False
         self.next_gen_in_it = self.next_gen_every_it
         self.genome = []
+        self.archive = []
+        self.minNov = -1
         self.seek = True
         self.avoid = False
         self.weights = None
@@ -52,7 +54,6 @@ class MedeaController(Controller):
         elif self.next_gen_in_it < 0:
             self.novelty = self.distMetric(10) * self.mates()
             self.new_generation()
-            #self.next_gen_in_it = self.next_gen_every_it
 
         else:
             # Movement
@@ -65,7 +66,7 @@ class MedeaController(Controller):
                     self.avoid = False
                     self.ditch = 25
             elif self.seek:
-                self.find() #cam = self.find()
+                self.find() 
             else:
                 self.seek = self.drop()
                 if self.wait <=0 :
@@ -79,7 +80,6 @@ class MedeaController(Controller):
         self.lastObj.removeAnchor(self.get_id())
         self.lastObj = None
         
-
     def leave(self):
         camera_dist = self.get_all_distances()
         if camera_dist[2] < 1:
@@ -234,6 +234,11 @@ class MedeaController(Controller):
                 if self.gList[gene].novelty > maxNovel:
                     selected = self.gList[gene]
                     maxNovel = selected.novelty
+            if self.minNov == -1: 
+                self.minNov = maxNovel
+                self.archive.append(selected)
+            elif maxNovel > self.minNov: self.archive.append(selected)
+            else: selected = np.random.choice(self.archive)
             self.variation(selected)
             self.gList.clear()
             self.next_gen_in_it = self.next_gen_every_it
@@ -267,7 +272,8 @@ class MedeaController(Controller):
             mutate[i] = (v1[i] + v2[i])//2
         self.genome = mutate
         self.set_color(*self.genome)
-        self.weights = other.weights.copy()
+        new_weights = other.weights.copy()
+        self.weights = np.random.normal(new_weights, 0.1   )
     
     def inspect(self, prefix=""):
         output = "received weights from: \n"

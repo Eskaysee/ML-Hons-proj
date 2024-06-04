@@ -117,15 +117,20 @@ class MWO(WorldObserver):
         self.f3 = None
         self.halfgenstock = 0
         self.check = True
+        self.testType = None
 
     def init_pre(self):
         super().init_pre()
         self.timeStart = time.time()
-        self.f3 = open("results/ExperimentsEnv2.txt", "r+")
+        input = str(sys.argv[1]); input = input.strip()
+        self.testType = input
+        self.f3 = open("results/Testing.txt", "r+")
         if self.f3.read(1) == "\n":
-            exNum = int(self.f3.readlines()[-33][20:])
+            if input == "random": exNum = int(self.f3.readlines()[-40][18:]) + 1
+            elif input == "fitness": exNum = int(self.f3.readlines()[-39][18:])
+            elif input == "hybrid": exNum = int(self.f3.readlines()[-39][19:])
         else: exNum = 1
-        self.C = [f"\nHybrid Experiment {exNum}"]
+        self.C = [f"\n{input} Experiment {exNum}"]
     
     def step_pre(self):
         super().step_pre()
@@ -136,26 +141,29 @@ class MWO(WorldObserver):
             elif self.stored==self.halfgenstock:
                 self.fullGenT = self.stopTimer(self.fullGenT)
                 self.check = False
-        if self.rob.iterations == 3001:
+        if self.rob.iterations == 6001:
             self.timeStart = time.time()
 
     def step_post(self):
         super().step_post()
         if self.rob.iterations != 0 and self.rob.iterations%600 == 0:
-            if self.rob.iterations == 3000:
+            if self.rob.iterations == 6000:
                 self.halfGenT = self.stopTimer(self.halfGenT)
                 self.halfgenstock = sum(list(self.storedItems().values()))
-            elif self.rob.iterations == 6000:
+            elif self.rob.iterations == 12000:
                 self.fullGenT = self.stopTimer(self.fullGenT)
             self.generation += 1
             activeRobs = self.activeRobots();storedItems = self.storedItems()
             totRobs = len(self.rob.controllers); totObjs = len(self.rob.objects)
+            storage = sum(list(self.storedItems().values()))
             self.C.append(f"\nAfter {self.generation} generation(s), there are {activeRobs} active robots out of {totRobs}. {totRobs - activeRobs} are dead.\n")
-            self.C.append(f"There are {self.stored} stored resources, specifically {str(storedItems)}, out of {totObjs}. {totObjs - self.stored} not yet stored. \n")
-        if self.rob.iterations == 6000: 
-            self.C.append(f"Took {self.halfGenT} to store {self.halfgenstock} resources during the first 5 generations\n")
-            self.C.append(f"Took {self.fullGenT} to store {self.stored} resources during the following 5 generations\n")
-            self.C.append("\n################################################################################################\n")
+            self.C.append(f"There are {storage} stored resources, specifically {str(storedItems)}, out of {totObjs}. {totObjs - self.stored} not yet stored. \n")
+        if self.rob.iterations == 12000:
+            self.C.append(f"Took {self.halfGenT} to store {self.halfgenstock} resources during the first 6 generations\n")
+            self.C.append(f"Took {self.fullGenT} to store {self.stored} resources during the following 6 generations\n")
+            if self.testType == "hybrid":
+                self.C.append("\n################################################################################################\n")
+            else: self.C.append("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
             self.f3.writelines(self.C)
             self.f3.close()
 
@@ -166,7 +174,7 @@ class MWO(WorldObserver):
         return genTimer
     
     def activeRobots(self):
-        activeRobs = 0;#
+        activeRobs = 0;
         for robot in self.rob.controllers:
             if not robot.deactivated:
                 activeRobs +=1
@@ -186,10 +194,13 @@ class MWO(WorldObserver):
 
 ################################################################################################
 
+#def exp(rob):
+
 def main(argv):
     input = str(argv); input = input.strip()
-    f3 = open("results/ExperimentsEnv2.txt", "a")
+    f3 = open("results/Testing.txt", "a")
     f3.close()
+    rob = None
     if input == "random":
         rob = Pyroborobo.create("config/NSmEDEA.properties",
                             controller_class=RandmEDEA.MedeaController,
@@ -197,7 +208,7 @@ def main(argv):
                             object_class_dict={'_default': Food})
     elif input == "fitness":
         rob = Pyroborobo.create("config/NSmEDEA.properties",
-                            controller_class=FitmEDEA,
+                            controller_class=FitmEDEA.MedeaController,
                             world_observer_class=MWO,
                             object_class_dict={'_default': Food})
     elif input == "hybrid":
@@ -206,12 +217,13 @@ def main(argv):
                             world_observer_class=MWO,
                             object_class_dict={'_default': Food})
     else: sys.exit()
+
     rob.start()
-    rob.update(3001)
-    resIdx = 51
-    for i in range(35):
+    rob.update(3601)
+    resIdx = 26
+    for i in range(50):
         rob.add_object(Food(resIdx+i))
-    rob.update(3001)
+    rob.update(3601)
 
     robStatus = ""; resourceStatus = ""
     for robot in rob.controllers:
@@ -225,7 +237,6 @@ def main(argv):
     f1.close()
     f2.close()
     rob.close()
-
-
+    
 if __name__ == "__main__":
     main(sys.argv[1])
