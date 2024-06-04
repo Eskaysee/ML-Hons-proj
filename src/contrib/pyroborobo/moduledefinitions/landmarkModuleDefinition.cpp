@@ -18,7 +18,7 @@ void addLandmarkBindings(pybind11::module &m)
     .def("set_coordinates", &LandmarkObject::setCoordinates, "x"_a, "y"_a, "Set the landmark at the coordinate (x,y)")
     .def("get_coordinates", [] (LandmarkObject &self) -> std::tuple<int, int> {
         auto pos = self.getCoordinates();
-        return {pos.x, pos.y};
+        return std::make_tuple(pos.x, pos.y);//{pos.x, pos.y};
         }, "return the (x,y) coordinates of the landmark.")
     .def("hide", [] (LandmarkObject& self) {self.hide(); self._visible = false;}, "Hide the landmark (but do not deactivate it)")
     .def("show", [] (LandmarkObject& self) {self.show(); self._visible = true;}, "Show the landmark on screen.")

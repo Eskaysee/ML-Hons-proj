@@ -88,7 +88,7 @@ bool: can object register at its actual position
             .def_property_readonly("position", [] (PhysicalObject& self) -> std::tuple<double, double>
                                    {
                                        // std::cout<< "cpp: " << self.getXReal() << ", " << self.getYReal() << std::endl;
-                                       return {self.getXReal(), self.getYReal()};
+                                       return std::make_tuple(self.getXReal(), self.getYReal());//{self.getXReal(), self.getYReal()};
                                    },
                                    "Return the position of the object"
             )

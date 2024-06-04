@@ -56,7 +56,7 @@ void addPyRobotBinding(py::module &m)
             .def_property_readonly("controller", &Robot::getController, "PyController: The robot's controller")
             .def_property_readonly("position", [] (Robot& self) -> std::tuple<double, double> {
                 const auto pos = self.getController()->getPosition();
-                return {pos.x, pos.y};
+                return std::make_tuple(pos.x, pos.y);//{pos.x, pos.y};
             })
             .def_property_readonly("observer", &Robot::getObserver, "PyAgentObserver: The robot's agent observer")
             .def_property_readonly("world_model", &Robot::getWorldModel, "RobotWorldModel: The robot's world model");

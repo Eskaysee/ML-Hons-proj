@@ -263,7 +263,7 @@ int: Index at which the robot ids start
 Everything under this offset is a physical objects. Everything above is a robot.
 )doc")
             .def_property_readonly("arena_size", [] (Pyroborobo& self) -> std::tuple<int, int> {
-                return {gAreaWidth, gAreaHeight};
+                return std::make_tuple(gAreaWidth, gAreaHeight);//{gAreaWidth, gAreaHeight};
             },
                                    R"doc(Tuple[int, int]: The size of the arena)doc")
             .def_property_readonly("landmarks", [] (Pyroborobo& self) { return gLandmarks;},

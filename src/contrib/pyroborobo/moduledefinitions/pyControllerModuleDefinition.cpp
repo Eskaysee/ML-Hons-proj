@@ -141,7 +141,7 @@ tuple[float, float, float]: (red, green, blue) from the ground sensor of the rob
             .def_property_readonly("absolute_position", [](Controller &self) -> std::tuple<double, double>
                                    {
                                        auto pos = self.getPosition();
-                                       return {pos.x, pos.y};
+                                       return std::make_tuple(pos.x, pos.y);//{pos.x, pos.y};
                                    },
                                    "Tuple[int, int]: Robot's absolute position")
             .def_property_readonly("absolute_orientation", &Controller::getCompass,
